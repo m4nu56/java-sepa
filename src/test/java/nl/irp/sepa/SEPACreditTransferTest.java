@@ -45,7 +45,7 @@ public class SEPACreditTransferTest extends XMLTestCase {
 		transfer.buildGroupHeader("000001", "Klantnaam", today.toDate());
 		
 		transfer
-			.betaalgroep("12345", new LocalDate("2013-04-19"), "Debiteur", "NL02ABNA0123456789", "ABNANL2A")
+			.paymentGroup("12345", new LocalDate("2013-04-19"), "Debiteur", "NL02ABNA0123456789", "ABNANL2A")
 				.creditTransfer("Onze referentie: 123456", new BigDecimal("386.00"), "RABONL2U", "Crediteur", "NL44RABO0123456789", "Ref. 2012.0386");
 		
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -64,7 +64,7 @@ public class SEPACreditTransferTest extends XMLTestCase {
 		transfer.buildGroupHeader("MSGID005", "IPNORGANIZTIONNAME", today.toDate());
 		
 		transfer
-			.betaalgroep("PAYID001", new LocalDate("2013-04-19"), "NAAM Debtor", "NL28INGB0000000001", "INGBNL2A")
+			.paymentGroup("PAYID001", new LocalDate("2013-04-19"), "NAAM Debtor", "NL28INGB0000000001", "INGBNL2A")
 				.creditTransfer("E2EID001", new BigDecimal("1.01"), "INGBNL2A", "NAAM cdtr", "NL98INGB0000000002", "Ref. 2012.0386");
 		
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -75,4 +75,23 @@ public class SEPACreditTransferTest extends XMLTestCase {
 		assertXMLEqual(example, xml);
 	}
 
+        @Test
+	public void testMultiple() throws DatatypeConfigurationException, JAXBException, XpathException, SAXException, IOException {
+		LocalDateTime today = new LocalDateTime("2013-06-28T15:57:09"); 
+		SEPACreditTransfer transfer = new SEPACreditTransfer();
+		
+		transfer.buildGroupHeader("MSGID005", "My Organization", today.toDate());
+		
+                SEPACreditTransfer.PaymentGroup paymentGroup = transfer.paymentGroup("PAYID001", new LocalDate("2013-07-01"), "Gewinnabwicklung TST", "AT131490022010010999", "SPADATW1");
+		paymentGroup.creditTransfer("E2EID001", new BigDecimal("100.55"), "INGDDEFFXXX", "Paul Testmann", "DE12500105170648489890", "Ihr Gewinn vom 25.05.2013");
+                paymentGroup.creditTransfer("E2EID002", new BigDecimal("17.00"), "RBABCH22350", "Peter Testmann", "CH3908704016075473007", "Ihr Gewinn vom 01.06.2013");
+                paymentGroup.creditTransfer("E2EID003", new BigDecimal("100.00"), "RABOBE22", "Thomas Testmann", "BE68844010370034", "Ihr Gewinn vom 05.06.2013");
+		
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		transfer.write(stream);
+		String xml = stream.toString("UTF-8");
+
+		String example = Resources.toString( Resources.getResource("ing/pain.001.001.03 multiple.xml"), Charsets.UTF_8);
+		assertXMLEqual(example, xml);
+	}
 }

@@ -113,7 +113,7 @@ public class SEPACreditTransfer {
 	 * @return 
 	 * @throws DatatypeConfigurationException
 	 */
-	public Betaalgroep betaalgroep(
+	public PaymentGroup paymentGroup(
 			String pmtInfId, LocalDate reqdExctnDt,
 			String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC) {
 		
@@ -162,15 +162,15 @@ public class SEPACreditTransfer {
 		
 		customerCreditTransferInitiation.getPmtInf().add(paymentInstructionInformation);
 		
-		return new Betaalgroep(paymentInstructionInformation);
+		return new PaymentGroup(paymentInstructionInformation);
 	}
 	
 	
-	public class Betaalgroep {
+	public class PaymentGroup {
 		
 		private PaymentInstructionInformation3 paymentInstructionInformation3;
 		
-		public Betaalgroep(PaymentInstructionInformation3 paymentInstructionInformation3) {
+		public PaymentGroup(PaymentInstructionInformation3 paymentInstructionInformation3) {
 			this.paymentInstructionInformation3 = paymentInstructionInformation3;
 		}
 		
@@ -188,7 +188,7 @@ public class SEPACreditTransfer {
 		 * @return 
 		 * 
 		 */
-		public Betaalgroep creditTransfer(String endToEndId, BigDecimal amount,
+		public PaymentGroup creditTransfer(String endToEndId, BigDecimal amount,
 				String creditorfinancialInstitutionBic,
 				String creditorNm, String iban,
 				String text) {
