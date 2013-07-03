@@ -94,4 +94,24 @@ public class SEPACreditTransferTest extends XMLTestCase {
 		String example = Resources.toString( Resources.getResource("ing/pain.001.001.03 multiple.xml"), Charsets.UTF_8);
 		assertXMLEqual(example, xml);
 	}
+        
+        @Test
+	public void testRapidMoneyTransfer() throws DatatypeConfigurationException, JAXBException, XpathException, SAXException, IOException {
+		LocalDateTime today = new LocalDateTime("2013-06-28T15:57:09"); 
+		SEPACreditTransfer transfer = new SEPACreditTransfer();
+		
+		transfer.buildGroupHeader("MSGID005", "My Organization", today.toDate());
+		
+                SEPACreditTransfer.PaymentGroup paymentGroup = transfer.paymentGroup("PAYID001", new LocalDate("2013-07-01"), "Gewinnabwicklung TST", "AT131490022010010999", "SPADATW1", true);
+		paymentGroup.creditTransfer("E2EID001", new BigDecimal("100.55"), "INGDDEFFXXX", "Paul Testmann", "DE12500105170648489890", "Ihr Gewinn vom 25.05.2013");
+                paymentGroup.creditTransfer("E2EID002", new BigDecimal("17.00"), "RBABCH22350", "Peter Testmann", "CH3908704016075473007", "Ihr Gewinn vom 01.06.2013");
+                paymentGroup.creditTransfer("E2EID003", new BigDecimal("100.00"), "RABOBE22", "Thomas Testmann", "BE68844010370034", "Ihr Gewinn vom 05.06.2013");
+		
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		transfer.write(stream);
+		String xml = stream.toString("UTF-8");
+
+		String example = Resources.toString( Resources.getResource("ing/pain.001.003.03 rapidMoneyTransfer.xml"), Charsets.UTF_8);
+		assertXMLEqual(example, xml);
+	}
 }

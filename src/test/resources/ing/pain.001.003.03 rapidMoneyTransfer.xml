@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:pain.001.001.03"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchemainstance">
+	<CstmrCdtTrfInitn>
+		<GrpHdr>
+			<MsgId>MSGID005</MsgId>
+			<CreDtTm>2013-06-28T15:57:09</CreDtTm>
+			<NbOfTxs>3</NbOfTxs>
+			<CtrlSum>217.55</CtrlSum>
+			<InitgPty>
+				<Nm>My Organization</Nm>
+			</InitgPty>
+		</GrpHdr>
+		<PmtInf>
+			<PmtInfId>PAYID001</PmtInfId>
+			<PmtMtd>TRF</PmtMtd>
+			<NbOfTxs>3</NbOfTxs>
+			<CtrlSum>217.55</CtrlSum>
+			<PmtTpInf>
+				<SvcLvl>
+					<Cd>URGP</Cd>
+				</SvcLvl>
+			</PmtTpInf>
+			<ReqdExctnDt>2013-07-01</ReqdExctnDt>
+			<Dbtr>
+				<Nm>Gewinnabwicklung TST</Nm>
+			</Dbtr>
+			<DbtrAcct>
+				<Id>
+					<IBAN>AT131490022010010999</IBAN>
+				</Id>
+			</DbtrAcct>
+			<DbtrAgt>
+				<FinInstnId>
+					<BIC>SPADATW1</BIC>
+				</FinInstnId>
+			</DbtrAgt>
+			<ChrgBr>SLEV</ChrgBr>
+			<CdtTrfTxInf>
+				<PmtId>
+					<EndToEndId>E2EID001</EndToEndId>
+				</PmtId>
+				<Amt>
+					<InstdAmt Ccy="EUR">100.55</InstdAmt>
+				</Amt>
+				<CdtrAgt>
+					<FinInstnId>
+						<BIC>INGDDEFFXXX</BIC>
+					</FinInstnId>
+				</CdtrAgt>
+				<Cdtr>
+					<Nm>Paul Testmann</Nm>
+				</Cdtr>
+				<CdtrAcct>
+					<Id>
+						<IBAN>DE12500105170648489890</IBAN>
+					</Id>
+				</CdtrAcct>
+				<RmtInf>
+					<Ustrd>Ihr Gewinn vom 25.05.2013</Ustrd>
+				</RmtInf>
+			</CdtTrfTxInf>
+                        <CdtTrfTxInf>
+				<PmtId>
+					<EndToEndId>E2EID002</EndToEndId>
+				</PmtId>
+				<Amt>
+					<InstdAmt Ccy="EUR">17.00</InstdAmt>
+				</Amt>
+				<CdtrAgt>
+					<FinInstnId>
+						<BIC>RBABCH22350</BIC>
+					</FinInstnId>
+				</CdtrAgt>
+				<Cdtr>
+					<Nm>Peter Testmann</Nm>
+				</Cdtr>
+				<CdtrAcct>
+					<Id>
+						<IBAN>CH3908704016075473007</IBAN>
+					</Id>
+				</CdtrAcct>
+				<RmtInf>
+					<Ustrd>Ihr Gewinn vom 01.06.2013</Ustrd>
+				</RmtInf>
+			</CdtTrfTxInf>
+                        <CdtTrfTxInf>
+				<PmtId>
+					<EndToEndId>E2EID003</EndToEndId>
+				</PmtId>
+				<Amt>
+					<InstdAmt Ccy="EUR">100.00</InstdAmt>
+				</Amt>
+				<CdtrAgt>
+					<FinInstnId>
+						<BIC>RABOBE22</BIC>
+					</FinInstnId>
+				</CdtrAgt>
+				<Cdtr>
+					<Nm>Thomas Testmann</Nm>
+				</Cdtr>
+				<CdtrAcct>
+					<Id>
+						<IBAN>BE68844010370034</IBAN>
+					</Id>
+				</CdtrAcct>
+				<RmtInf>
+					<Ustrd>Ihr Gewinn vom 05.06.2013</Ustrd>
+				</RmtInf>
+			</CdtTrfTxInf>
+		</PmtInf>
+	</CstmrCdtTrfInitn>
+</Document>

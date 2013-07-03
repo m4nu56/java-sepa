@@ -109,13 +109,15 @@ public class SEPACreditTransfer {
 	 * @param date This is the date on which the debtor's account is to be debited. 
 	 * @param debtorNm Party that owes an amount of money to the (ultimate) creditor.
 	 * @param debtorAccountIBAN Unambiguous identification of the account of the debtor to which a debit 
+         * @param isRapidMoneyTransfer <code>true</code> if the transactions of this group shall be handled as rapid money transfer ("Eilueberweisung"), default <code>false</code>
 	 * entry will be made as a result of the transaction.
 	 * @return 
 	 * @throws DatatypeConfigurationException
 	 */
 	public PaymentGroup paymentGroup(
 			String pmtInfId, LocalDate reqdExctnDt,
-			String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC) {
+			String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC, 
+                        boolean isRapidMoneyTransfer) {
 		
 		checkArgument(pmtInfId.length()<=35, "length of pmtInfId is more than 35");
 		checkArgument(pmtInfId.length()>1, "length of pmtInfId is less than 1");
@@ -141,7 +143,11 @@ public class SEPACreditTransfer {
 		// Payment Type Information
 		PaymentTypeInformation19 paymentTypeInformation = new PaymentTypeInformation19();
 		ServiceLevel8Choice serviceLevel8Choice = new ServiceLevel8Choice();
-		serviceLevel8Choice.setCd("SEPA");//Vaste waarde 'SEPA'
+                String serviceLevelCode = "SEPA";
+                if (isRapidMoneyTransfer) {
+                    serviceLevelCode = "URGP";
+                }
+		serviceLevel8Choice.setCd(serviceLevelCode);
 		paymentTypeInformation.setSvcLvl(serviceLevel8Choice);
 		paymentInstructionInformation.setPmtTpInf(paymentTypeInformation);
 
@@ -165,7 +171,28 @@ public class SEPACreditTransfer {
 		return new PaymentGroup(paymentInstructionInformation);
 	}
 	
-	
+	/**
+	 * Payment Information: This building block is mandatory and repetitive. It contains besides
+	 * elements related to the debit side of the transaction, such as Debtor and Payment Type
+	 * Information, also one or several Transaction Information Blocks.
+	 * 
+	 * Set of characteristics that applies to the debit side of the payment transactions
+	 * included in the credit transfer initiation.
+	 * @param pmtInfId Unique identification, as assigned by a sending party, to unambiguously identify the 
+	 * payment information group within the message.
+	 * @param date This is the date on which the debtor's account is to be debited. 
+	 * @param debtorNm Party that owes an amount of money to the (ultimate) creditor.
+	 * @param debtorAccountIBAN Unambiguous identification of the account of the debtor to which a debit 
+	 * entry will be made as a result of the transaction.
+	 * @return 
+	 * @throws DatatypeConfigurationException
+	 */
+	public PaymentGroup paymentGroup(
+			String pmtInfId, LocalDate reqdExctnDt,
+			String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC) {
+            return paymentGroup(pmtInfId, reqdExctnDt, debtorNm, debtorAccountIBAN, financialInstitutionBIC, false);
+        }
+        
 	public class PaymentGroup {
 		
 		private PaymentInstructionInformation3 paymentInstructionInformation3;
