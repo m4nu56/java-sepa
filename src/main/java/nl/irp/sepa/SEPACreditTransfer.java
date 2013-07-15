@@ -14,18 +14,36 @@ import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentInstructionInformation3;
 import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentMethod3Code;
 import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentTypeInformation19;
 import iso.std.iso._20022.tech.xsd.pain_001_001.ServiceLevel8Choice;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 
 import org.joda.time.LocalDate;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * The Customer SEPA Credit Transfer Initiation message is sent by the
@@ -64,7 +82,87 @@ public class SEPACreditTransfer {
 
         // The UTF-8 character encoding standard must be used in the UNIFI messages.
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-        marshaller.marshal(new ObjectFactory().createDocument(document), os);
+        if (version == VERSION_PAIN_001_002_02) {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            marshaller.marshal(new ObjectFactory().createDocument(document), bout);
+            ByteArrayOutputStream convertedXml = convertPain03ToPain02(new ByteArrayInputStream(bout.toByteArray()));
+            try {
+                os.write(convertedXml.toByteArray());
+            } catch (IOException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else {
+            marshaller.marshal(new ObjectFactory().createDocument(document), os);
+        }
+    }
+    
+    /**
+     * converts the given XML in format pain.001.001.03 into the format pain.001.002.02
+     * @param xml XML as input stream
+     * @return converted XML as output stream
+     */
+    public ByteArrayOutputStream convertPain03ToPain02(InputStream xml) {
+        ByteArrayOutputStream bout = null;
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder dBuilder;
+        try {
+            dBuilder = dbFactory.newDocumentBuilder();
+            try {
+                org.w3c.dom.Document doc = dBuilder.parse(xml);
+                org.w3c.dom.Element root = doc.getDocumentElement();
+                root.setAttribute("xmlns", "urn:swift:xsd:$pain.001.002.02");
+                org.w3c.dom.Element container = null;
+                NodeList cl = root.getElementsByTagName("CstmrCdtTrfInitn");
+                if (cl.getLength() > 0) {
+                    container = (org.w3c.dom.Element)cl.item(0);
+                }
+                if (container != null) {
+                    doc.renameNode(container, null, "pain.001.001.02"); // ** rename node "CstmrCdtTrfInitn" to "pain.001.001.02" **
+                    NodeList nl = container.getElementsByTagName("GrpHdr");
+                    for (int i = 0; i < nl.getLength(); i++) {
+                        org.w3c.dom.Element groupHeader = (org.w3c.dom.Element)nl.item(i);
+                        // ** create a node "Grpg" with the content "MIXD" and add it before node "InitgPty" **
+                        org.w3c.dom.Element grpg = doc.createElement("Grpg"); 
+                        grpg.setTextContent("MIXD");
+                        NodeList initiatingParty = groupHeader.getElementsByTagName("InitgPty");
+                        if (initiatingParty.getLength() > 0) {
+                            org.w3c.dom.Element party = (org.w3c.dom.Element)initiatingParty.item(0);
+                            groupHeader.insertBefore(grpg, party);
+                        }
+                    }
+                    NodeList paymentInfos = container.getElementsByTagName("PmtInf");
+                    for (int i = 0; i < paymentInfos.getLength(); i++) {
+                        // ** remove the nodes "NbOfTxs" and "CtrlSum" from payment infos **
+                        org.w3c.dom.Element paymentInfo = (org.w3c.dom.Element)paymentInfos.item(i);
+                        NodeList transactionNumbers = paymentInfo.getElementsByTagName("NbOfTxs");
+                        for (int j = 0; j < transactionNumbers.getLength(); j++) {
+                            paymentInfo.removeChild(transactionNumbers.item(j));
+                        }
+                        NodeList controlSums = paymentInfo.getElementsByTagName("CtrlSum");
+                        for (int j = 0; j < controlSums.getLength(); j++) {
+                            paymentInfo.removeChild(controlSums.item(j));
+                        }
+                    }
+                }
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+                bout = new ByteArrayOutputStream();
+		StreamResult xresult = new StreamResult(bout);
+		transformer.transform(source, xresult);
+            } catch (SAXException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformerConfigurationException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformerException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return bout;
     }
 
     /**
