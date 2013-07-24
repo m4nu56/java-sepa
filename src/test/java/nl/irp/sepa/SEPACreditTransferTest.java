@@ -118,8 +118,7 @@ public class SEPACreditTransferTest extends XMLTestCase {
         @Test
 	public void testPainVersion02() throws DatatypeConfigurationException, JAXBException, XpathException, SAXException, IOException {
 		LocalDateTime today = new LocalDateTime("2013-06-28T15:57:09"); 
-		SEPACreditTransfer transfer = new SEPACreditTransfer();
-                transfer.setVersion(SEPACreditTransfer.VERSION_PAIN_001_002_02);
+		SEPACreditTransfer transfer = new SEPACreditTransfer(SEPACreditTransfer.VERSION_PAIN_001_002_02);
 		
 		transfer.buildGroupHeader("MSGID005", "My Organization", today.toDate());
 		
@@ -136,5 +135,21 @@ public class SEPACreditTransferTest extends XMLTestCase {
 		assertXMLEqual(example, xml);
 	}
         
+        @Test
+	public void testRefuseVersion02RapidMoneyTransfer() throws DatatypeConfigurationException, JAXBException, XpathException, SAXException, IOException {
+		LocalDateTime today = new LocalDateTime("2013-06-28T15:57:09"); 
+		SEPACreditTransfer transfer = new SEPACreditTransfer(SEPACreditTransfer.VERSION_PAIN_001_002_02);
+		
+		transfer.buildGroupHeader("MSGID005", "My Organization", today.toDate());
+		
+                boolean wasRefused = false;
+                try {
+                    SEPACreditTransfer.PaymentGroup paymentGroup = transfer.paymentGroup("PAYID001", new LocalDate("2013-07-01"), "Gewinnabwicklung TST", "AT131490022010010999", "SPADATW1", true);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("Caught exception " + e.getClass().getName() + ": '" + e.getMessage() + "'");
+                    wasRefused = true;
+                }
+		assertTrue(wasRefused);
+	}
 
 }

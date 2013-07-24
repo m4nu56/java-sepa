@@ -52,13 +52,12 @@ import org.xml.sax.SAXException;
  *
  *
  * According to the Implementation Guidelines for the XML Customer Credit
- * Transfer Initiation message UNIFI (ISO20022) - "pain.001.001.03" in the
- * Netherlands.
+ * Transfer Initiation message UNIFI (ISO20022) - "pain.001.001.03".
  *
  * And: XML message for SEPA Credit Transfer Initiation Implementation
  * Guidelines for the Netherlands Version 5.0 – January 2012
  *
- * @author Jasper Krijgsman <jasper@irp.nl>
+ * @author Jasper Krijgsman <jasper@irp.nl>, Olaf Maass <olaf.maass@siteforce.de>
  */
 public class SEPACreditTransfer {
 
@@ -70,9 +69,23 @@ public class SEPACreditTransfer {
     private GroupHeader32 groupHeader;
     private int version = VERSION_PAIN_001_001_03;
 
+    /**
+     * Constructor without version information will create SEPA xml of version "pain.001.001.03"
+     */
     public SEPACreditTransfer() {
         customerCreditTransferInitiation = new CustomerCreditTransferInitiationV03();
         document.setCstmrCdtTrfInitn(customerCreditTransferInitiation);
+    }
+
+    /**
+     * Constructor with version information
+     * @param version either constant <code>VERSION_PAIN_001_001_03</code> (default) or 
+     * <code>VERSION_PAIN_001_002_02</code>
+     */
+    public SEPACreditTransfer(int version) {
+        customerCreditTransferInitiation = new CustomerCreditTransferInitiationV03();
+        document.setCstmrCdtTrfInitn(customerCreditTransferInitiation);
+        this.version = version;
     }
 
     public void write(OutputStream os) throws JAXBException {
@@ -236,6 +249,7 @@ public class SEPACreditTransfer {
 
         checkArgument(pmtInfId.length() <= 35, "length of pmtInfId is more than 35");
         checkArgument(pmtInfId.length() > 1, "length of pmtInfId is less than 1");
+        checkArgument((isRapidMoneyTransfer && getVersion() != VERSION_PAIN_001_002_02) || !isRapidMoneyTransfer, "SEPA version 'pain.001.002.02' does not support rapid money transfer");
 
 
         PaymentInstructionInformation3 paymentInstructionInformation = new PaymentInstructionInformation3();
@@ -318,13 +332,6 @@ public class SEPACreditTransfer {
      */
     public int getVersion() {
         return version;
-    }
-
-    /**
-     * @param version the version to set
-     */
-    public void setVersion(int version) {
-        this.version = version;
     }
 
     public class PaymentGroup {
