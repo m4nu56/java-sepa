@@ -73,8 +73,7 @@ public class SEPACreditTransfer {
      * Constructor without version information will create SEPA xml of version "pain.001.001.03"
      */
     public SEPACreditTransfer() {
-        customerCreditTransferInitiation = new CustomerCreditTransferInitiationV03();
-        document.setCstmrCdtTrfInitn(customerCreditTransferInitiation);
+        this(VERSION_PAIN_001_001_03);
     }
 
     /**
