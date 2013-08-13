@@ -98,7 +98,7 @@ public class SEPACreditTransferTest extends XMLTestCase {
         @Test
 	public void testRapidMoneyTransfer() throws DatatypeConfigurationException, JAXBException, XpathException, SAXException, IOException {
 		LocalDateTime today = new LocalDateTime("2013-06-28T15:57:09"); 
-		SEPACreditTransfer transfer = new SEPACreditTransfer();
+		SEPACreditTransfer transfer = new SEPACreditTransfer(SEPACreditTransfer.VERSION_PAIN_001_003_03);
 		
 		transfer.buildGroupHeader("MSGID005", "My Organization", today.toDate());
 		

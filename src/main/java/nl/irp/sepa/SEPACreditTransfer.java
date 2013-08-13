@@ -63,6 +63,7 @@ public class SEPACreditTransfer {
 
     public static final int VERSION_PAIN_001_001_03 = 3;
     public static final int VERSION_PAIN_001_002_02 = 2;
+    public static final int VERSION_PAIN_001_003_03 = 4;
     
     private Document document = new Document();
     private CustomerCreditTransferInitiationV03 customerCreditTransferInitiation;
@@ -98,6 +99,15 @@ public class SEPACreditTransfer {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             marshaller.marshal(new ObjectFactory().createDocument(document), bout);
             ByteArrayOutputStream convertedXml = convertPain03ToPain02(new ByteArrayInputStream(bout.toByteArray()));
+            try {
+                os.write(convertedXml.toByteArray());
+            } catch (IOException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } else if (version == VERSION_PAIN_001_003_03) {
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            marshaller.marshal(new ObjectFactory().createDocument(document), bout);
+            ByteArrayOutputStream convertedXml = convertPain03ToPain001_003_03(new ByteArrayInputStream(bout.toByteArray()));
             try {
                 os.write(convertedXml.toByteArray());
             } catch (IOException ex) {
@@ -156,6 +166,44 @@ public class SEPACreditTransfer {
                         }
                     }
                 }
+                TransformerFactory transformerFactory = TransformerFactory.newInstance();
+		Transformer transformer = transformerFactory.newTransformer();
+		DOMSource source = new DOMSource(doc);
+                bout = new ByteArrayOutputStream();
+		StreamResult xresult = new StreamResult(bout);
+		transformer.transform(source, xresult);
+            } catch (SAXException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformerConfigurationException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (TransformerException ex) {
+                Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        } catch (ParserConfigurationException ex) {
+            Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return bout;
+    }
+
+    /**
+     * converts the given XML in format pain.001.001.03 into the format pain.001.003.03. 
+     * The only thing that is changed is the xmlns attribute of the root node.
+     * @param xml XML as input stream
+     * @return converted XML as output stream
+     */
+    public ByteArrayOutputStream convertPain03ToPain001_003_03(InputStream xml) {
+        ByteArrayOutputStream bout = null;
+        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+	DocumentBuilder dBuilder;
+        try {
+            dBuilder = dbFactory.newDocumentBuilder();
+            try {
+                org.w3c.dom.Document doc = dBuilder.parse(xml);
+                org.w3c.dom.Element root = doc.getDocumentElement();
+                // ** simply change the xmlns attribute to new version **
+                root.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.001.003.03");
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
 		Transformer transformer = transformerFactory.newTransformer();
 		DOMSource source = new DOMSource(doc);
