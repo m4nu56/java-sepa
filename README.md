@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/m4nu56/java-sepa.svg?branch=master)](https://travis-ci.com/m4nu56/java-sepa)
+
 # sepa-pain - UPDATED FOR FRANCE
 
 This is a fork of [https://github.com/poornerd/java-sepa](https://github.com/poornerd/java-sepa) which has specific adjustments for Deutsche financial institutions.
