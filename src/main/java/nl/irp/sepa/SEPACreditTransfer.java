@@ -1,31 +1,9 @@
 package nl.irp.sepa;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static nl.irp.sepa.Utils.*;
-import iso.std.iso._20022.tech.xsd.pain_001_001.ChargeBearerType1Code;
-import iso.std.iso._20022.tech.xsd.pain_001_001.CreditTransferTransactionInformation10;
-import iso.std.iso._20022.tech.xsd.pain_001_001.CustomerCreditTransferInitiationV03;
-import iso.std.iso._20022.tech.xsd.pain_001_001.Document;
-import iso.std.iso._20022.tech.xsd.pain_001_001.GroupHeader32;
-import iso.std.iso._20022.tech.xsd.pain_001_001.LocalInstrument2Choice;
-import iso.std.iso._20022.tech.xsd.pain_001_001.ObjectFactory;
-import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentIdentification1;
-import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentInstructionInformation3;
-import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentMethod3Code;
-import iso.std.iso._20022.tech.xsd.pain_001_001.PaymentTypeInformation19;
-import iso.std.iso._20022.tech.xsd.pain_001_001.ServiceLevel8Choice;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import iso.std.iso._20022.tech.xsd.pain_001_001.*;
+import org.joda.time.LocalDate;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -40,10 +18,15 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.io.*;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import org.joda.time.LocalDate;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import static com.google.common.base.Preconditions.checkArgument;
+import static nl.irp.sepa.Utils.*;
 
 /**
  * The Customer SEPA Credit Transfer Initiation message is sent by the
@@ -265,6 +248,10 @@ public class SEPACreditTransfer {
         customerCreditTransferInitiation.setGrpHdr(groupHeader);
     }
 
+    public GroupHeader32 getGroupHeader() {
+        return this.groupHeader;
+    }
+
     /**
      * Payment Information: This building block is mandatory and repetitive. It
      * contains besides elements related to the debit side of the transaction,
@@ -276,7 +263,7 @@ public class SEPACreditTransfer {
      *
      * @param pmtInfId Unique identification, as assigned by a sending party, to
      * unambiguously identify the payment information group within the message.
-     * @param date This is the date on which the debtor's account is to be
+     * @param reqdExctnDt This is the date on which the debtor's account is to be
      * debited.
      * @param debtorNm Party that owes an amount of money to the (ultimate)
      * creditor.
@@ -358,7 +345,7 @@ public class SEPACreditTransfer {
      *
      * @param pmtInfId Unique identification, as assigned by a sending party, to
      * unambiguously identify the payment information group within the message.
-     * @param date This is the date on which the debtor's account is to be
+     * @param reqdExctnDt This is the date on which the debtor's account is to be
      * debited.
      * @param debtorNm Party that owes an amount of money to the (ultimate)
      * creditor.
