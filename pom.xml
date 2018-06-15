@@ -6,7 +6,7 @@
     <groupId>nl.irp.sepa</groupId>
     <artifactId>sepa-iso20022</artifactId>
     <name>SEPA iso20022 utilities</name>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.5</version>
     <packaging>jar</packaging>
     <inceptionYear>2012</inceptionYear>
     <licenses>
@@ -141,5 +141,20 @@
             <version>11.0.1</version>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <!-- use the following if you're not using a snapshot version. -->
+        <repository>
+            <id>nexus-release</id>
+            <name>Releases</name>
+            <url>http://localhost:8081/repository/maven-releases/</url>
+        </repository>
+        <!-- use the following if you ARE using a snapshot version. -->
+        <snapshotRepository>
+            <id>nexus-snapshot</id>
+            <name>Snapshots</name>
+            <url>http://localhost:8081/repository/maven-snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
 </project>
