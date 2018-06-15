@@ -1,9 +1,13 @@
-sepa-pain - updated for GERMANY
+sepa-pain - updated for GERMANY -- TESTED FOR FRANCE
 =========
 
-This Java library aims to make it easier to create SEPA PAIN messages for use in financial applications.
+This is a fork of [https://github.com/poornerd/java-sepa](https://github.com/poornerd/java-sepa) which has specific adjustments for Deutsche financial institutions.
 
-This Branch is only suitable for use with Deutsche financial institutions.
+It has been very lightly adusted to work in France.
+
+Testé pour des Virements Sepa avec le Crédit Mutuel. 
+Testé pour des Prélèvements automatiques. 
+
 
 The implementation is based on:
 XML message for SEPA Credit Transfer Initiation Implementation Guidelines for the Netherlands
