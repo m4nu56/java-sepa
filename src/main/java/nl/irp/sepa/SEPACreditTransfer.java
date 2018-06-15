@@ -217,9 +217,26 @@ public class SEPACreditTransfer {
      * @param msgId Point to point reference, as assigned by the instructing
      * party
      * @param name Name of the party that initiates the payment.
+     * @param date Date of the action
      * @throws DatatypeConfigurationException
      */
     public void buildGroupHeader(String msgId, String name, Date date) {
+        buildGroupHeader(msgId, name, date, null);
+    }
+
+
+    /**
+     * Group Header: This building block is mandatory and present once. It
+     * contains elements such as Message Identification, Creation Date and Time,
+     * Grouping Indicator. Set of characteristics shared by all individual
+     *
+     * @param msgId Point to point reference, as assigned by the instructing
+     * party
+     * @param name Name of the party that initiates the payment.
+     * @param date Date of the action
+     * @param prvId String id of the Indentifiant SEPA
+     */
+    public void buildGroupHeader(String msgId, String name, Date date, String prvId) {
         groupHeader = new GroupHeader32();
         // Point to point reference, as assigned by the instructing party, and sent to the next
         // party in the chain to unambiguously identify the message.
@@ -245,11 +262,44 @@ public class SEPACreditTransfer {
         // Party that initiates the payment.
         groupHeader.setInitgPty(createParty(name));
 
+        // if prvId is set we add the block to groupHeader
+        if (prvId != null) {
+            addGroupHeaderPrvtId(prvId);
+        }
+
         customerCreditTransferInitiation.setGrpHdr(groupHeader);
     }
 
-    public GroupHeader32 getGroupHeader() {
-        return this.groupHeader;
+    /**
+     * Ajout dans le groupHeader du fichier XML SEPA dans InitgPty de la balise Id avec ses children
+     * <InitgPty>
+     *      <Nm>SAS IDEIA ONA</Nm>
+     *      <Id>
+     *          <PrvtId>
+     *              <Othr>
+     *                <Id>Indentifiant SEPA</Id>
+     *             </Othr>
+     *          </PrvtId>
+     *      </Id>
+     * </InitgPty>
+     *
+     * @param prvId String id of the Indentifiant SEPA
+     */
+    private void addGroupHeaderPrvtId(String prvId) {
+
+        PartyIdentification32 partyIdentification32 = this.groupHeader.getInitgPty();
+
+        Party6Choice party6Choice = new Party6Choice();
+        partyIdentification32.setId(party6Choice);
+
+        PersonIdentification5 personIdentification5 = new PersonIdentification5();
+        party6Choice.setPrvtId(personIdentification5);
+
+        GenericPersonIdentification1 genericPersonIdentification1 = new GenericPersonIdentification1();
+        personIdentification5.getOthr().add(genericPersonIdentification1);
+
+        genericPersonIdentification1.setId(prvId);
+
     }
 
     /**
