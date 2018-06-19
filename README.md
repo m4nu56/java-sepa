@@ -10,7 +10,7 @@ It has been very lightly adusted to work in France.
 ### What's been tested
 * Testé pour des Virements Sepa avec le Crédit Mutuel. 
 * Testé pour des Prélèvements automatiques. 
-
+* Changement d'iban pour un débiteur avec utilisation de la même RUM (autorisation de prélèvement)
 
 ### Origin
 The implementation is based on:
