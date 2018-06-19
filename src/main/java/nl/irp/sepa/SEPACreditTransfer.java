@@ -273,17 +273,17 @@ public class SEPACreditTransfer {
     /**
      * Ajout dans le groupHeader du fichier XML SEPA dans InitgPty de la balise Id avec ses children
      * <InitgPty>
-     *      <Nm>SAS IDEIA ONA</Nm>
+     *      <Nm>Nom entreprise</Nm>
      *      <Id>
      *          <PrvtId>
      *              <Othr>
-     *                <Id>Indentifiant SEPA</Id>
+     *                <Id>Identifiant SEPA</Id>
      *             </Othr>
      *          </PrvtId>
      *      </Id>
      * </InitgPty>
      *
-     * @param prvId String id of the Indentifiant SEPA
+     * @param prvId String id of the Indentifiant SEPA: CODE_BANQUE+NUMERO_EMETTEUR (attached)
      */
     private void addGroupHeaderPrvtId(String prvId) {
 
