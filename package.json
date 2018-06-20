@@ -1,31 +1,31 @@
 {
-  "name": "java-sepa",
-  "version": "0.0.7",
-  "description": "[![Build Status](https://travis-ci.com/m4nu56/java-sepa.svg?branch=master)](https://travis-ci.com/m4nu56/java-sepa)",
-  "main": "index.js",
-  "directories": {
-    "doc": "doc"
-  },
-  "dependencies": {
-    "husky": "^0.14.3",
-    "prettier": "^1.13.5",
-    "prettier-plugin-java": "0.0.10",
-    "pretty-quick": "^1.6.0"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "prettier": "prettier --write src/**/*{java}",
-    "precommit": "npm run pretty-quick --staged",
-    "pretty-quick": "pretty-quick"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/m4nu56/java-sepa.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/m4nu56/java-sepa/issues"
-  },
-  "homepage": "https://github.com/m4nu56/java-sepa#readme"
+    "name": "java-sepa",
+    "version": "0.0.7",
+    "description": "[![Build Status](https://travis-ci.com/m4nu56/java-sepa.svg?branch=master)](https://travis-ci.com/m4nu56/java-sepa)",
+    "main": "index.js",
+    "directories": {
+        "doc": "doc"
+    },
+    "dependencies": {
+        "husky": "^0.14.3",
+        "prettier": "^1.13.5",
+        "prettier-plugin-java": "0.0.10",
+        "pretty-quick": "^1.6.0"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "prettier": "prettier --write src/**/*{java}",
+        "precommit": "npm run pretty-quick --staged",
+        "pretty-quick": "pretty-quick"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/m4nu56/java-sepa.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/m4nu56/java-sepa/issues"
+    },
+    "homepage": "https://github.com/m4nu56/java-sepa#readme"
 }
