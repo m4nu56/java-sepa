@@ -81,13 +81,13 @@ public class DirectDebitInitiation {
 			String pmtInfId, Date reqdColltnDt,
 			String creditor, SequenceType1Code type,
 			String creditorCountry, List<String> addressLines,
-			String creditorAccount, String creditorBic) {
+			String creditorAccount, String creditorBic, String cdtrSchmeId) {
 
 		PaymentInstruction paymentInstruction = new PaymentInstruction(
 				pmtInfId, reqdColltnDt,
 				creditor, type,
 				creditorCountry, addressLines,
-				creditorAccount, creditorBic);
+				creditorAccount, creditorBic, cdtrSchmeId);
 		this.customerDirectDebitInitiationV02.getPmtInf().add(paymentInstruction.getPaymentInstructionInformation());
 		return paymentInstruction;
 	}
@@ -97,16 +97,23 @@ public class DirectDebitInitiation {
 		private PaymentInstructionInformation4 paymentInstructionInformation;
 
 		/**
+		 * collected from the debtor.
 		 *
 		 * @param pmtInfId
 		 * @param reqdColltnDt Date and time at which the creditor requests that the amount of money is to be
-		 * collected from the debtor.
+		 * @param creditor
+		 * @param type
+		 * @param creditorCountry
+		 * @param addressLines
+		 * @param creditorAccount
+		 * @param creditorBic
+		 * @param cdtrSchmeId
 		 */
 		public PaymentInstruction(
 				String pmtInfId, Date reqdColltnDt,
 				String creditor, SequenceType1Code type,
 				String creditorCountry, List<String> addressLines,
-				String creditorAccount, String creditorBic) {
+				String creditorAccount, String creditorBic, String cdtrSchmeId) {
 
 			paymentInstructionInformation = new PaymentInstructionInformation4();
 
@@ -142,6 +149,12 @@ public class DirectDebitInitiation {
 			paymentInstructionInformation.setCdtrAgt( createFinInstnId(creditorBic) );
 
 			paymentInstructionInformation.setChrgBr(ChargeBearerType1Code.SLEV);
+
+			if (StringUtils.isNotBlank(cdtrSchmeId)) {
+				paymentInstructionInformation.setCdtrSchmeId(Utils.createIdParty(cdtrSchmeId));
+			}
+
+
 
 		}
 
@@ -299,8 +312,9 @@ public class DirectDebitInitiation {
 			mandateInf.setAmdmntInd(false);
 			transaction.setMndtRltdInf(mandateInf);
 
-			////
-			transaction.setCdtrSchmeId(createIdParty(cdtrSchmeId));
+			if (StringUtils.isNotBlank(cdtrSchmeId)) {
+				transaction.setCdtrSchmeId(createIdParty(cdtrSchmeId));
+			}
 
 			return transaction;
 		}
