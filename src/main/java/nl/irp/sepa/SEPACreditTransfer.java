@@ -1,9 +1,13 @@
 package nl.irp.sepa;
 
 import iso.std.iso._20022.tech.xsd.pain_001_001.*;
-import org.joda.time.LocalDate;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+
+import java.io.*;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -18,12 +22,10 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import java.io.*;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.joda.time.LocalDate;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static nl.irp.sepa.Utils.*;
@@ -43,11 +45,10 @@ import static nl.irp.sepa.Utils.*;
  * @author Jasper Krijgsman <jasper@irp.nl>, Olaf Maass <olaf.maass@siteforce.de>
  */
 public class SEPACreditTransfer {
-
     public static final int VERSION_PAIN_001_001_03 = 3;
     public static final int VERSION_PAIN_001_002_02 = 2;
     public static final int VERSION_PAIN_001_003_03 = 4;
-    
+
     private Document document = new Document();
     private CustomerCreditTransferInitiationV03 customerCreditTransferInitiation;
     private GroupHeader32 groupHeader;
@@ -84,23 +85,25 @@ public class SEPACreditTransfer {
             ByteArrayOutputStream convertedXml = convertPain03ToPain02(new ByteArrayInputStream(bout.toByteArray()));
             try {
                 os.write(convertedXml.toByteArray());
-            } catch (IOException ex) {
+            } catch(IOException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if (version == VERSION_PAIN_001_003_03) {
             ByteArrayOutputStream bout = new ByteArrayOutputStream();
             marshaller.marshal(new ObjectFactory().createDocument(document), bout);
-            ByteArrayOutputStream convertedXml = convertPain03ToPain001_003_03(new ByteArrayInputStream(bout.toByteArray()));
+            ByteArrayOutputStream convertedXml = convertPain03ToPain001_003_03(
+                new ByteArrayInputStream(bout.toByteArray())
+            );
             try {
                 os.write(convertedXml.toByteArray());
-            } catch (IOException ex) {
+            } catch(IOException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else {
             marshaller.marshal(new ObjectFactory().createDocument(document), os);
         }
     }
-    
+
     /**
      * converts the given XML in format pain.001.001.03 into the format pain.001.002.02
      * @param xml XML as input stream
@@ -109,7 +112,7 @@ public class SEPACreditTransfer {
     public ByteArrayOutputStream convertPain03ToPain02(InputStream xml) {
         ByteArrayOutputStream bout = null;
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder dBuilder;
+        DocumentBuilder dBuilder;
         try {
             dBuilder = dbFactory.newDocumentBuilder();
             try {
@@ -119,26 +122,26 @@ public class SEPACreditTransfer {
                 org.w3c.dom.Element container = null;
                 NodeList cl = root.getElementsByTagName("CstmrCdtTrfInitn");
                 if (cl.getLength() > 0) {
-                    container = (org.w3c.dom.Element)cl.item(0);
+                    container = (org.w3c.dom.Element) cl.item(0);
                 }
                 if (container != null) {
                     doc.renameNode(container, null, "pain.001.001.02"); // ** rename node "CstmrCdtTrfInitn" to "pain.001.001.02" **
                     NodeList nl = container.getElementsByTagName("GrpHdr");
                     for (int i = 0; i < nl.getLength(); i++) {
-                        org.w3c.dom.Element groupHeader = (org.w3c.dom.Element)nl.item(i);
+                        org.w3c.dom.Element groupHeader = (org.w3c.dom.Element) nl.item(i);
                         // ** create a node "Grpg" with the content "MIXD" and add it before node "InitgPty" **
-                        org.w3c.dom.Element grpg = doc.createElement("Grpg"); 
+                        org.w3c.dom.Element grpg = doc.createElement("Grpg");
                         grpg.setTextContent("MIXD");
                         NodeList initiatingParty = groupHeader.getElementsByTagName("InitgPty");
                         if (initiatingParty.getLength() > 0) {
-                            org.w3c.dom.Element party = (org.w3c.dom.Element)initiatingParty.item(0);
+                            org.w3c.dom.Element party = (org.w3c.dom.Element) initiatingParty.item(0);
                             groupHeader.insertBefore(grpg, party);
                         }
                     }
                     NodeList paymentInfos = container.getElementsByTagName("PmtInf");
                     for (int i = 0; i < paymentInfos.getLength(); i++) {
                         // ** remove the nodes "NbOfTxs" and "CtrlSum" from payment infos **
-                        org.w3c.dom.Element paymentInfo = (org.w3c.dom.Element)paymentInfos.item(i);
+                        org.w3c.dom.Element paymentInfo = (org.w3c.dom.Element) paymentInfos.item(i);
                         NodeList transactionNumbers = paymentInfo.getElementsByTagName("NbOfTxs");
                         for (int j = 0; j < transactionNumbers.getLength(); j++) {
                             paymentInfo.removeChild(transactionNumbers.item(j));
@@ -150,21 +153,21 @@ public class SEPACreditTransfer {
                     }
                 }
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		DOMSource source = new DOMSource(doc);
+                Transformer transformer = transformerFactory.newTransformer();
+                DOMSource source = new DOMSource(doc);
                 bout = new ByteArrayOutputStream();
-		StreamResult xresult = new StreamResult(bout);
-		transformer.transform(source, xresult);
-            } catch (SAXException ex) {
+                StreamResult xresult = new StreamResult(bout);
+                transformer.transform(source, xresult);
+            } catch(SAXException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch(IOException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerConfigurationException ex) {
+            } catch(TransformerConfigurationException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerException ex) {
+            } catch(TransformerException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (ParserConfigurationException ex) {
+        } catch(ParserConfigurationException ex) {
             Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return bout;
@@ -179,7 +182,7 @@ public class SEPACreditTransfer {
     public ByteArrayOutputStream convertPain03ToPain001_003_03(InputStream xml) {
         ByteArrayOutputStream bout = null;
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder dBuilder;
+        DocumentBuilder dBuilder;
         try {
             dBuilder = dbFactory.newDocumentBuilder();
             try {
@@ -188,21 +191,21 @@ public class SEPACreditTransfer {
                 // ** simply change the xmlns attribute to new version **
                 root.setAttribute("xmlns", "urn:iso:std:iso:20022:tech:xsd:pain.001.003.03");
                 TransformerFactory transformerFactory = TransformerFactory.newInstance();
-		Transformer transformer = transformerFactory.newTransformer();
-		DOMSource source = new DOMSource(doc);
+                Transformer transformer = transformerFactory.newTransformer();
+                DOMSource source = new DOMSource(doc);
                 bout = new ByteArrayOutputStream();
-		StreamResult xresult = new StreamResult(bout);
-		transformer.transform(source, xresult);
-            } catch (SAXException ex) {
+                StreamResult xresult = new StreamResult(bout);
+                transformer.transform(source, xresult);
+            } catch(SAXException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
+            } catch(IOException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerConfigurationException ex) {
+            } catch(TransformerConfigurationException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TransformerException ex) {
+            } catch(TransformerException ex) {
                 Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (ParserConfigurationException ex) {
+        } catch(ParserConfigurationException ex) {
             Logger.getLogger(SEPACreditTransfer.class.getName()).log(Level.SEVERE, null, ex);
         }
         return bout;
@@ -224,7 +227,6 @@ public class SEPACreditTransfer {
         buildGroupHeader(msgId, name, date, null);
     }
 
-
     /**
      * Group Header: This building block is mandatory and present once. It
      * contains elements such as Message Identification, Creation Date and Time,
@@ -237,12 +239,9 @@ public class SEPACreditTransfer {
      * @param prvId String id of the Indentifiant SEPA
      */
     public void buildGroupHeader(String msgId, String name, Date date, String prvId) {
-        groupHeader = new GroupHeader32();
-        // Point to point reference, as assigned by the instructing party, and sent to the next
-        // party in the chain to unambiguously identify the message.
-        // The instructing party has to make sure that MessageIdentification is unique per
-        // instructed party for a pre-agreed period.
+        groupHeader = new GroupHeader32(); // Point to point reference, as assigned by the instructing party, and sent to the next
         // if no msgId is given create one
+
         if (msgId == null) {
             msgId = UUID.randomUUID().toString().replaceAll("-", "");
         }
@@ -261,12 +260,11 @@ public class SEPACreditTransfer {
 
         // Party that initiates the payment.
         groupHeader.setInitgPty(createParty(name));
-
         // if prvId is set we add the block to groupHeader
+
         if (prvId != null) {
             addGroupHeaderPrvtId(prvId);
         }
-
         customerCreditTransferInitiation.setGrpHdr(groupHeader);
     }
 
@@ -286,7 +284,6 @@ public class SEPACreditTransfer {
      * @param prvId String id of the Indentifiant SEPA: CODE_BANQUE+NUMERO_EMETTEUR (attached)
      */
     private void addGroupHeaderPrvtId(String prvId) {
-
         PartyIdentification32 partyIdentification32 = this.groupHeader.getInitgPty();
 
         Party6Choice party6Choice = new Party6Choice();
@@ -299,7 +296,6 @@ public class SEPACreditTransfer {
         personIdentification5.getOthr().add(genericPersonIdentification1);
 
         genericPersonIdentification1.setId(prvId);
-
     }
 
     /**
@@ -327,14 +323,19 @@ public class SEPACreditTransfer {
      * @throws DatatypeConfigurationException
      */
     public PaymentGroup paymentGroup(
-            String pmtInfId, LocalDate reqdExctnDt,
-            String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC,
-            boolean isRapidMoneyTransfer) {
-
+        String pmtInfId,
+        LocalDate reqdExctnDt,
+        String debtorNm,
+        String debtorAccountIBAN,
+        String financialInstitutionBIC,
+        boolean isRapidMoneyTransfer
+    ) {
         checkArgument(pmtInfId.length() <= 35, "length of pmtInfId is more than 35");
         checkArgument(pmtInfId.length() > 1, "length of pmtInfId is less than 1");
-        checkArgument((isRapidMoneyTransfer && getVersion() != VERSION_PAIN_001_002_02) || !isRapidMoneyTransfer, "SEPA version 'pain.001.002.02' does not support rapid money transfer");
-
+        checkArgument(
+            isRapidMoneyTransfer && getVersion() != VERSION_PAIN_001_002_02 || !isRapidMoneyTransfer,
+            "SEPA version 'pain.001.002.02' does not support rapid money transfer"
+        );
 
         PaymentInstructionInformation3 paymentInstructionInformation = new PaymentInstructionInformation3();
         //customerCreditTransferInitiation.getPmtInf().add(paymentInstructionInformation);
@@ -364,7 +365,7 @@ public class SEPACreditTransfer {
         paymentTypeInformation.setSvcLvl(serviceLevel8Choice);
         paymentInstructionInformation.setPmtTpInf(paymentTypeInformation);
 
-        // This is the date on which the debtor's account is to be debited. 
+        // This is the date on which the debtor's account is to be debited.
         paymentInstructionInformation.setReqdExctnDt(createXMLGregorianCalendarDate(reqdExctnDt.toDate()));
 
         // Party that owes an amount of money to the (ultimate) creditor.
@@ -406,8 +407,12 @@ public class SEPACreditTransfer {
      * @throws DatatypeConfigurationException
      */
     public PaymentGroup paymentGroup(
-            String pmtInfId, LocalDate reqdExctnDt,
-            String debtorNm, String debtorAccountIBAN, String financialInstitutionBIC) {
+        String pmtInfId,
+        LocalDate reqdExctnDt,
+        String debtorNm,
+        String debtorAccountIBAN,
+        String financialInstitutionBIC
+    ) {
         return paymentGroup(pmtInfId, reqdExctnDt, debtorNm, debtorAccountIBAN, financialInstitutionBIC, false);
     }
 
@@ -419,7 +424,6 @@ public class SEPACreditTransfer {
     }
 
     public class PaymentGroup {
-
         private PaymentInstructionInformation3 paymentInstructionInformation3;
 
         public PaymentGroup(PaymentInstructionInformation3 paymentInstructionInformation3) {
@@ -446,12 +450,17 @@ public class SEPACreditTransfer {
          * @return
          *
          */
-        public PaymentGroup creditTransfer(String endToEndId, BigDecimal amount,
-                String creditorfinancialInstitutionBic,
-                String creditorNm, String iban,
-                String text) {
+        public PaymentGroup creditTransfer(
+            String endToEndId,
+            BigDecimal amount,
+            String creditorfinancialInstitutionBic,
+            String creditorNm,
+            String iban,
+            String text
+        ) {
+            CreditTransferTransactionInformation10 creditTransferTransactionInformation = new CreditTransferTransactionInformation10(
 
-            CreditTransferTransactionInformation10 creditTransferTransactionInformation = new CreditTransferTransactionInformation10();
+            );
 
             // Unique identification as assigned by an instructing party for an instructed party to
             // unambiguously identify the instruction.
@@ -459,11 +468,10 @@ public class SEPACreditTransfer {
             paymentIdentification.setEndToEndId(endToEndId);
             creditTransferTransactionInformation.setPmtId(paymentIdentification);
 
-            // Amount of money to be moved between the debtor and creditor, before deduction of 
+            // Amount of money to be moved between the debtor and creditor, before deduction of
             // charges, expressed in the currency as ordered by the initiating party.
             creditTransferTransactionInformation.setAmt(createAmount(amount));
 
-            // Only 'SLEV' is allowed. 
             //creditTransferTransactionInformation.setChrgBr(ChargeBearerType1Code.SLEV);
 
             // Financial institution servicing an account for the creditor.
@@ -485,12 +493,17 @@ public class SEPACreditTransfer {
             groupHeader.setCtrlSum(groupHeader.getCtrlSum().add(amount));
 
             // Number of transactions
-            paymentInstructionInformation3.setNbOfTxs(String.valueOf(paymentInstructionInformation3.getCdtTrfTxInf().size()));
+            paymentInstructionInformation3.setNbOfTxs(
+                String.valueOf(paymentInstructionInformation3.getCdtTrfTxInf().size())
+            );
             Integer nbOfTxs = Integer.parseInt(groupHeader.getNbOfTxs());
             nbOfTxs = nbOfTxs + 1;
             groupHeader.setNbOfTxs(nbOfTxs.toString());
 
             return this;
         }
+
     }
+
 }
+
