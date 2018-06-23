@@ -10,6 +10,7 @@ import org.custommonkey.xmlunit.NamespaceContext;
 import org.custommonkey.xmlunit.SimpleNamespaceContext;
 import org.custommonkey.xmlunit.XMLTestCase;
 import org.custommonkey.xmlunit.XMLUnit;
+import org.jdom2.JDOMException;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalDateTime;
 import org.junit.Test;
@@ -108,7 +109,7 @@ public class DirectDebitInitiationTest extends XMLTestCase {
 	}
 
 	@Test
-	public void testPaymentWithIbanChanged() throws JAXBException, SAXException, IOException {
+	public void testPaymentWithIbanChanged() throws JAXBException, SAXException, IOException, JDOMException {
 		LocalDateTime today = new LocalDateTime("2012-02-22T09:29:54");
 		DirectDebitInitiation debitInitiation = new DirectDebitInitiation();
 
@@ -135,7 +136,7 @@ public class DirectDebitInitiationTest extends XMLTestCase {
 				null);
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		debitInitiation.write(stream);
+		debitInitiation.writeWithXmlnsXsi(stream);
 		String xml = stream.toString("UTF-8");
 
 		System.out.println(xml);
@@ -192,7 +193,7 @@ public class DirectDebitInitiationTest extends XMLTestCase {
 				null);
 
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-		debitInitiation.write(stream);
+		debitInitiation.writeWithXmlnsXsi(stream);
 		String xml = stream.toString("UTF-8");
 
         System.out.println(xml);
@@ -200,7 +201,5 @@ public class DirectDebitInitiationTest extends XMLTestCase {
 		String example = Resources.toString( Resources.getResource("ing/pain.008.001.02 cdtrSchmeId-paymentInstruction.xml"), Charsets.UTF_8);
 		assertXMLEqual(example, xml);
 	}
-
-
 
 }

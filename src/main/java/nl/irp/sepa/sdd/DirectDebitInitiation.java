@@ -2,11 +2,20 @@ package nl.irp.sepa.sdd;
 
 import iso.std.iso._20022.tech.xsd.pain_008_001.*;
 import org.apache.commons.lang3.StringUtils;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.joda.time.LocalDate;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.util.Date;
@@ -75,6 +84,49 @@ public class DirectDebitInitiation {
         // The UTF-8 character encoding standard must be used in the UNIFI messages.
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.marshal(new ObjectFactory().createDocument(document), os);
+	}
+
+	/**
+	 * Modification de l'outputstream qui contient le xml généré pour lui ajouter le namespace
+	 * <code>xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"</code>
+	 * <p>
+	 * La méthode utilisée est à mon avis largement améliorable:
+	 * - chargement du document depuis l'outputstream dans un jdom2.document
+	 * - ajout du namespace au jdom2.document
+	 * - écriture du nouveau xml sur l'outputstream (après l'avoir réinitialisé)
+	 *
+	 * @param os
+	 * @throws JAXBException
+	 * @throws JDOMException
+	 * @throws IOException
+	 */
+	public void writeWithXmlnsXsi(ByteArrayOutputStream os) throws JAXBException, JDOMException, IOException {
+		// 1- On écrit le XML dans l'outputstream
+		write(os);
+
+		// 2- On ajoute le namespace xmlns:xsi au xml
+		addSchemaInstanceToXml(os);
+	}
+
+	private void addSchemaInstanceToXml(ByteArrayOutputStream os) throws JDOMException, IOException {
+		org.jdom2.Document document = loadXMLFromOutputStream(os);
+		os.reset(); // on vide l'outpustream
+		Namespace xsi    = Namespace.getNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+		Element   racine = document.getRootElement();
+		racine.addNamespaceDeclaration(xsi);
+		writeDocumentToOutputStream(document, os);
+	}
+
+	private void writeDocumentToOutputStream(org.jdom2.Document document, OutputStream os) throws IOException {
+		Format format = Format.getPrettyFormat();
+		format.setEncoding("UTF-8");
+		XMLOutputter sortie = new XMLOutputter(format);
+		sortie.output(document, os);
+	}
+
+	private org.jdom2.Document loadXMLFromOutputStream(ByteArrayOutputStream os) throws JDOMException, IOException {
+		SAXBuilder builder = new SAXBuilder();
+		return builder.build(new ByteArrayInputStream(os.toByteArray()));
 	}
 
 	public PaymentInstruction paymentInstruction(
