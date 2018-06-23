@@ -5,12 +5,17 @@
 This is a fork of [https://github.com/poornerd/java-sepa](https://github.com/poornerd/java-sepa) which has specific adjustments for Deutsche financial institutions.
 
 ### What's been done
-It has been very lightly adusted to work in France.
+It has been very lightly adusted to work in France:
+* Ajout d'une méthode writer pour avoir le xmlns:xsi dans les XML de sortie
+
+#### Prélèvement
+* Ajout d'un constructeur pour les addTransaction afin de gérer le changement d'IBAN d'un débiteur avec conservation de la même RUM
+
 
 ### What's been tested
 * Testé pour des Virements Sepa avec le Crédit Mutuel. 
-* Testé pour des Prélèvements automatiques. 
-* Changement d'iban pour un débiteur avec utilisation de la même RUM (autorisation de prélèvement)
+* Testé pour des Prélèvements automatiques avec envoi au Trésor Publique (france). 
+* Changement d'iban pour un débiteur avec utilisation de la même RUM (mandat de prélèvement)
 
 ### Origin
 The implementation is based on:
